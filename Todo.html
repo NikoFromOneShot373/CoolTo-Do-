@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Untitled Goose Game</title>
+	<style type="text/css">
+		body {
+			padding: 40px;
+			max-width: 600px;
+			margin: auto;
+		}
+
+		h1 {
+			text-align: center;
+			margin-bottom: 20px;
+		}
+
+		.controls {
+			gap: 10px;
+			display: flex;
+			margin-bottom: 10px;
+		}
+
+		input[type="text"], select {
+			flex: 1;
+			padding: 10px;
+			font-size: 16px;
+			border-radius: 8px;
+			border: 1px solid black;
+		}
+
+		button {
+			padding: 10px 15px;
+			border: none;
+			background-color: darkblue;
+			color: whitesmoke;
+			border-radius: 10px	;
+			cursor: pointer;
+			transition: 0.3s;
+		}
+
+		button:hover {
+			background-color: lightblue;
+		}
+
+		ul {
+			list-style: none;
+			padding: 0;
+		}
+
+		li {
+			/* */
+		}
+
+		.priority.high { color: blue}
+		.priority.medium { color: darkblue;}
+		.priority.low { color: black;}
+
+		.info-bar {
+			margin-top: 15px ;
+			display: flex;
+			justify-content: space-between;
+			font-size: 25px;
+		}
+
+		.small-btn {
+			background-color: darkgrey;
+		}
+
+				.small-btn:hover {
+			background-color: black;			
+		}
+	</style>
+</head>
+<body>
+	<h1>Список задач для проф. гусей</h1>
+
+	<div class="controls">
+		<input type="text" id="taskInput" placeholder="я гусь, пожалуй до вас докопаюсь">
+		<select id="prioritySelect" title="Выберите приоритет">
+			<option value="low">утка</option>
+			<option value="normal">лебедь</option>
+			<option value="high">гусь</option>
+		</select>
+		<button id="addTaskBtn">Добавить</button>
+
+	</div>
+		<div class="controls">
+		<select id="filterSelect" title="Фильтрация по приоритету">
+			<option value="all">показать все</option>
+			<option value="low">утка</option>
+			<option value="normal">лебедь</option>
+			<option value="high">гусь</option>
+		</select>
+		<button id="clearDoneBtn" class="small-btn">Очистить выполненные</button>
+	</div>
+
+	<ul id="taskList"></ul>
+
+	<div class="info-bar">
+		<div>Всего: <span id="totalCount">0</span></div>
+		<div>Выполнено: <span id="doneCount">0</span></div>
+	</div>
+</body>
+
+
+<script type="text/javascript">
+	const taskInput = document.getElementById('taskInput');
+	const addTaskBtn = document.getElementById('addTaskBtn');
+	const TaskList = document.getElementById('TaskList');
+	const prioritySelect = document.getElementById('prioritySelect');
+	const filterSelect = document.getElementById('filterSelect');
+	const doneCount = document.getElementById('doneCount');
+	const totalCount = document.getElementById('totalCount');
+	const clearBtn = document.getElementById('clearBtn');
+
+	let tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
+
+	function renderTasks() {
+		TaskList,innerHTML = "";
+		const filter = filterSelect.value;
+		let total = 0;
+		let done = 0;
+
+		tasks.forEach((task, index) => {
+			if (filter !== "all" && task.priority !== filter) return;
+
+			total++;
+			if (task.done) done++;
+
+			const li = document.createElent("li");
+			if (task.done) li.classList.add("done");
+
+			const span = document.createElent("span");
+			span.textContent = task.text;
+			span.className = "priority " + task.priority;
+			span.title = "Приоритет: " + task.priority;
+			span.style.cursor = "pointer";
+
+			span.onclick = () => {
+				task.done = !task.done;
+				saveAndRender();
+			};
+
+			const delBtn = document.createElent("button");
+			delBtn.textContent = "☥";
+			delBtn.className = "small-btn";
+
+			delBtn.onclick = () => {
+				tasks.splice(index, 1);
+				saveAndRender();
+			};
+
+			li.appendChild(span);
+			li.appendChild(delBtn);
+			TaskList.appendChild(li);
+		});
+
+		totalCount.textContents = total;
+		doneCount.textContent = done;
+	}
+	
+	function saveAndRender() {
+		localStorage.setItem("tasks", JSON.stringify(tasks));
+		renderTasks();
+	}
+
+addTaskBtn.onclick = () => {
+	const text = taskInput.value.trim();
+	const priority = prioritySelect.value;
+
+	if (!text) {
+		alert('Введите задачу!');
+		return;
+	}
+
+	tasks.push({text, priority, done: false})
+	taskInput.value = "";
+	taskInput.focus();
+	saveAndRender();
+};
+
+filterSelect.onchange = renderTasks;
+
+clearDonebtn.onclick = () => {
+	tasks = tasks.filter(task => !task.done);
+	saveAndRender;
+};
+
+renderTasks();
+</script>
+
+</html>
